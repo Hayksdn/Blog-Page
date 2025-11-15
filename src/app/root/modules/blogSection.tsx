@@ -1,26 +1,45 @@
+import { useState } from "react";
 import { CustomContainer } from "@/shared/layout/container";
-import { Flex, Grid, Image, Text } from "@chakra-ui/react";
+import { Button, Flex, Grid, Image, Text } from "@chakra-ui/react";
 import { Card } from "@chakra-ui/react";
-import { articles } from "@/data/mockData";
+import { blogs } from "@/data/blogs";
 import ArrowIcon from "@/shared/assets/icons/arrow";
 import { NavLink } from "react-router-dom";
-import type { Article } from "@/shared/types/article";
+import type { Blog } from "@/shared/types/blog";
+import ArrowDownIcon from "@/shared/assets/icons/arrowDown";
 
 interface BlogSectionProps {
   searchTerm: string;
 }
 
 const BlogSection = ({ searchTerm }: BlogSectionProps) => {
-  const filteredArticles: Article[] = searchTerm
-    ? articles.filter((article) =>
-        (article.title + article.description)
+  const [visibleCount, setVisibleCount] = useState(6);
+
+  const filteredBlogs: Blog[] = searchTerm
+    ? blogs.filter((blog) =>
+        (blog.title + blog.description + blog.author)
           .toLowerCase()
           .includes(searchTerm.toLowerCase())
       )
-    : articles;
+    : blogs;
+
+  const visibleBlogs = filteredBlogs.slice(0, visibleCount);
+
+  const handleLoadMore = () => {
+    setVisibleCount((prev) => prev + 3);
+  };
+
+  const allLoaded = visibleCount >= filteredBlogs.length;
 
   return (
-    <CustomContainer variant="container" mx="auto">
+    <CustomContainer
+      variant="container"
+      mx="auto"
+      display="flex"
+      flexDir="column"
+      gap="1rem"
+      mb="1rem"
+    >
       <Grid
         templateColumns={{
           base: "1fr",
@@ -29,9 +48,9 @@ const BlogSection = ({ searchTerm }: BlogSectionProps) => {
         }}
         gap={6}
       >
-        {filteredArticles.map((article) => (
+        {visibleBlogs.map((blog) => (
           <Card.Root
-            key={article.id}
+            key={blog.id}
             border="none"
             opacity={1}
             p="24px 24px 32px 24px"
@@ -42,11 +61,12 @@ const BlogSection = ({ searchTerm }: BlogSectionProps) => {
             gap="32px"
           >
             <Card.Header p={0}>
-              <Image src={article.image} />
+              <Image src={blog.image} />
             </Card.Header>
+
             <Card.Body p="0" display="flex" flexDir="column">
               <Text color="#6941C6" fontSize="14px" fontWeight="semibold">
-                {article.category}
+                {blog.category}
               </Text>
               <Flex flexDir="column" gap="12px">
                 <Flex position="relative">
@@ -54,12 +74,12 @@ const BlogSection = ({ searchTerm }: BlogSectionProps) => {
                     color="#101828"
                     fontSize="24px"
                     fontWeight="semibold"
-                    maxW="300px"
+                    maxW={{ md: "300px", base: "250px" }}
                   >
-                    {article.title}
+                    {blog.title}
                   </Text>
                   <NavLink
-                    to="/"
+                    to={`/blog/${blog.id}`}
                     style={{ position: "absolute", top: 10, right: 0 }}
                   >
                     <ArrowIcon />
@@ -67,28 +87,49 @@ const BlogSection = ({ searchTerm }: BlogSectionProps) => {
                 </Flex>
 
                 <Text color="#667085" fontSize="16px">
-                  {article.description}
+                  {blog.description}
                 </Text>
               </Flex>
             </Card.Body>
+
             <Card.Footer p="0">
               <Flex flexDir="row" gap="12px">
                 <Image
-                  src={article.avatar}
+                  src={blog.avatar}
                   rounded="50%"
                   w="40px"
                   h="40px"
-                  bg={article.avatarColor}
+                  bg={blog.avatarColor}
                 />
                 <Flex flexDir="column" fontSize="14px">
-                  <Text color="#101828">{article.author}</Text>
-                  <Text color="#667085">{article.date}</Text>
+                  <Text color="#101828">{blog.author}</Text>
+                  <Text color="#667085">{blog.date}</Text>
                 </Flex>
               </Flex>
             </Card.Footer>
           </Card.Root>
         ))}
       </Grid>
+
+      {!allLoaded && (
+        <Flex w="full" justify="center" mt="1rem">
+          <Button
+            onClick={handleLoadMore}
+            color="#6941C6"
+            bg="#F3EBFF"
+            fontSize="14px"
+            rounded="xl"
+            fontWeight="medium"
+            gap="0.5rem"
+            w="fit-content"
+            p="1.5rem"
+            h="1.7rem"
+          >
+            <ArrowDownIcon />
+            Load More
+          </Button>
+        </Flex>
+      )}
     </CustomContainer>
   );
 };

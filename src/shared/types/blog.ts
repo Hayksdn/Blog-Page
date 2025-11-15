@@ -1,4 +1,4 @@
-export type Article = {
+export type Blog = {
   id: number;
   category: string;
   title: string;
